@@ -1,0 +1,33 @@
+{
+  "name": "2",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "next": "15.1.4",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-file-icon": "^1.5.0",
+    "react-use-websocket": "^4.11.1",
+    "sass": "^1.83.4",
+    "sweetalert2": "^11.15.10",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.7",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/react-file-icon": "^1.0.4",
+    "file-saver": "^2.0.5",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5"
+  }
+}

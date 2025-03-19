@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --light-grey: #f5f5f5;
+  --navy-grey: #707991;
+  --light-green: #78e378;
+  --iceberg-blue: #8babd8;
+  --light-blue-grey: #d9dce0;
+  --blue-grey: #3d70b899;
+  --dark-green: #4caf52;
+  --dark-blue: #0785ed;
+  --dark-grey: #d1cece;
+}
+
+@layer utilities {
+  .login-input:focus {
+    outline: none;
+  }
+  .login-input::placeholder {
+    font-size: 0.8rem;
+  }
+  .btn-blue-pink {
+    background-image: linear-gradient(to right, #1a49f6, #cd16cd);
+  }
+  .light-gray {
+    color: #848488;
+  }
+  .dark-red {
+    color: #b3261e;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .animate-seen {
+    transition: background-color 0.3s;
+    div {
+      transition: background-color 0.3s, transform 0.15s;
+      transform: translateX(12px);
+    }
+  }
+}
