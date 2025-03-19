@@ -65,12 +65,14 @@ const Message: React.FC<MessageProps> = ({ message }) => {
     const reader = response.body?.getReader();
     const chunks = [];
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      loaded += value.length;
-      onProgress(Math.round((loaded / total) * 100));
+    if (reader) {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        loaded += value.length;
+        onProgress(Math.round((loaded / total) * 100));
+      }
     }
 
     const blob = new Blob(chunks);
@@ -127,7 +129,6 @@ const Message: React.FC<MessageProps> = ({ message }) => {
 
                   saveAs(blob, "downloaded-file"); // Trigger file download
                   console.log(`Time taken to download: ${timeTaken}ms`);
-
                 } catch (error) {
                   console.error("Download failed:", error);
                 }
