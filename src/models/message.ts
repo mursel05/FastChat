@@ -14,6 +14,7 @@ export type MessageType = {
   sender: string;
   message: string;
   mediaUrl: string;
+  fileName: string;
   createdAt: string;
   updatedAt: string;
   seen: SeenType[];

@@ -1,9 +1,12 @@
 import { DataContext } from "@/context/ApiContext";
+import axiosInstance from "@/utils/axios";
 import Image from "next/image";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 
 const ChatHeader = () => {
-  const { currentUser } = useContext(DataContext);
+  const { currentUser, setCurrentChat, currentChat, setChats } =
+    useContext(DataContext);
+  const [isOpen, setIsOpen] = useState(false);
 
   const formatLastSeen = (lastSeen: string) => {
     if (lastSeen === "online") return "online";
@@ -30,14 +33,26 @@ const ChatHeader = () => {
     }
   };
 
+  async function deleteChat() {
+    try {
+      const res = await axiosInstance.delete("/chats/" + currentChat?.id);
+      if (res.data.success) {
+        setCurrentChat(undefined);
+        setChats((prevChats) =>
+          prevChats.filter((chat) => chat.id !== currentChat?.id)
+        );
+      }
+    } catch {}
+  }
+
   return (
-    <div className="flex items-center gap-4 py-3 px-4 border-l border-[var(--light-blue-grey)] bg-white">
+    <div className="relative flex items-center gap-4 py-3 px-4 border-l border-[var(--light-blue-grey)] bg-white">
       <Image
-        src="/images/no-profile.jpg"
-        width={48}
-        height={48}
+        src={currentUser?.photo || "/images/no-profile.jpg"}
+        width={100}
+        height={100}
         alt="user"
-        className="rounded-full ml-2"
+        className="rounded-full w-[3rem] h-[3rem] object-cover"
       />
       <div className="flex flex-col gap-1 w-full">
         <div className="flex items-center justify-between">
@@ -58,8 +73,29 @@ const ChatHeader = () => {
         <div className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
           <Image src="/icons/call.png" width={35} height={35} alt="phone" />
         </div>
-        <div className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
+        <div
+          className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2"
+          onClick={() => setIsOpen(!isOpen)}>
           <Image src="/icons/more.png" width={35} height={35} alt="more" />
+        </div>
+      </div>
+      <div
+        className="max-h-0 overflow-hidden transition-all duration-300 ease-in-out z-50 absolute right-[2rem] top-[3.5rem] bg-white rounded-md flex flex-col border-[var(--light-blue-grey)]"
+        style={{
+          maxHeight: isOpen ? "200px" : "0",
+          borderWidth: isOpen ? "1px" : "0",
+        }}>
+        <div
+          className="flex items-center gap-2 py-2 px-4 hover:bg-[var(--light-grey)] rounded-md cursor-pointer"
+          onClick={deleteChat}>
+          <Image src="/icons/delete.png" width={15} height={15} alt="delete" />
+          <p className="font-[400] text-[#707991] text-[14px]">Delete</p>
+        </div>
+        <div
+          className="flex items-center gap-2 py-2 px-4 hover:bg-[var(--light-grey)] rounded-md cursor-pointer"
+          onClick={() => setCurrentChat(undefined)}>
+          <Image src="/icons/close.png" width={15} height={15} alt="close" />
+          <p className="font-[400] text-[#707991] text-[14px]">Close</p>
         </div>
       </div>
     </div>

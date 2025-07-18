@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 export async function middleware(req: NextRequest) {
   const refreshToken = req.cookies.get("refreshToken")?.value;
   const pathname = req.nextUrl.pathname;
-  const authRoutes = ["/login", "/signup"];
+  const authRoutes = ["/login/", "/signup/"];
   const isResetPasswordRoute = pathname.startsWith("/reset_password/");
   if (
     !refreshToken &&

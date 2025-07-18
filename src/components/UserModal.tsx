@@ -10,7 +10,8 @@ interface UserModalProps {
 }
 
 const UserModal: React.FC<UserModalProps> = ({ user }) => {
-  const { setChats, setCurrentChat, chats, setUsers } = useContext(DataContext);
+  const { setChats, setCurrentChat, chats, setUsers, setOpenSettings } =
+    useContext(DataContext);
 
   async function createChat() {
     const res = await axiosInstance.post("/chats", {
@@ -30,6 +31,7 @@ const UserModal: React.FC<UserModalProps> = ({ user }) => {
     const currentChat = chats.find((chat) =>
       chat.persons.some((p) => p.userId === user.id)
     );
+    setOpenSettings(false);
     if (currentChat) {
       setCurrentChat(currentChat);
     } else {
@@ -43,10 +45,10 @@ const UserModal: React.FC<UserModalProps> = ({ user }) => {
       className="flex items-center gap-4 py-3 px-4 hover:bg-[var(--light-grey)] cursor-pointer">
       <Image
         src={user?.photo || "/images/no-profile.jpg"}
-        width={48}
-        height={48}
+        width={100}
+        height={100}
         alt="user"
-        className="rounded-full"
+        className="rounded-full w-[3rem] h-[3rem] object-cover"
       />
       <div className="flex flex-col gap-1 w-full">
         <div className="flex items-center justify-between">

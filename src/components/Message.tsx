@@ -2,9 +2,10 @@ import { DataContext } from "@/context/ApiContext";
 import { MessageType } from "@/models/message";
 import axiosInstance from "@/utils/axios";
 import Image from "next/image";
-import { useCallback, useContext, useRef } from "react";
+import { useCallback, useContext, useRef, useState } from "react";
 import { defaultStyles, FileIcon } from "react-file-icon";
 import { saveAs } from "file-saver";
+import Swal from "sweetalert2";
 
 interface MessageProps {
   message: MessageType;
@@ -13,6 +14,8 @@ interface MessageProps {
 const Message: React.FC<MessageProps> = ({ message }) => {
   const { currentUser, user, messagesRef } = useContext(DataContext);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const [percent, setPercent] = useState(0);
+  const [controller, setController] = useState<AbortController | null>(null);
 
   async function handleSeen(messageId: string) {
     try {
@@ -20,6 +23,11 @@ const Message: React.FC<MessageProps> = ({ message }) => {
         messageId,
       });
     } catch (error) {}
+  }
+
+  function getFileExtension() {
+    const parts = message.fileName.split(".");
+    return parts.length > 1 ? parts.pop()?.toLowerCase() : "";
   }
 
   const messageRefCallback = useCallback(
@@ -48,38 +56,55 @@ const Message: React.FC<MessageProps> = ({ message }) => {
     [messagesRef]
   );
 
-  async function downloadFileWithProgress(
-    url: string | URL | Request,
-    filename: string | undefined,
-    onProgress: (arg0: number) => void
-  ) {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Network response was not ok");
+  async function downloadFileWithProgress(url: string | URL | Request) {
+    const abortController = new AbortController();
+    setController(abortController);
 
-    const contentLength = response.headers.get("Content-Length");
-    if (!contentLength) throw new Error("Content-Length is missing");
+    try {
+      const response = await fetch(url, { signal: abortController.signal });
 
-    const total = parseInt(contentLength, 10);
-    let loaded = 0;
-
-    const reader = response.body?.getReader();
-    const chunks = [];
-
-    if (reader) {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-        loaded += value.length;
-        onProgress(Math.round((loaded / total) * 100));
+      if (!response.ok) {
+        Swal.fire({
+          title: "No internet connection",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        return;
       }
+
+      const contentLength = response.headers.get("Content-Length");
+      if (!contentLength) return;
+
+      const total = parseInt(contentLength, 10);
+      let loaded = 0;
+      const reader = response.body?.getReader();
+      const chunks = [];
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          loaded += value.length;
+          setPercent(Math.round((loaded / total) * 100));
+        }
+      }
+
+      const blob = new Blob(chunks);
+      saveAs(blob, message.fileName);
+    } catch (error: any) {
+      if (error.name !== "AbortError") {
+        Swal.fire({
+          title: "Download failed",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } finally {
+      setPercent(0);
+      setController(null);
     }
-
-    const blob = new Blob(chunks);
-    saveAs(blob, filename);
   }
-
-  // Usage
 
   if (currentUser) {
     return message.sender == currentUser?.id ? (
@@ -103,42 +128,61 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               controls
               width="300"
               height="300"
-              onClick={() => saveAs(message.mediaUrl)}
               className="cursor-pointer"></video>
           ) : message.messageType.split("/")[0] == "audio" ? (
             <audio
               src={message.mediaUrl}
               controls
-              onClick={() => saveAs(message.mediaUrl)}
               className="cursor-pointer"></audio>
           ) : (
-            <div
-              className="w-[100px] h-[100px] self-center mb-5 cursor-pointer"
-              onClick={async () => {
-                try {
-                  const startTime = new Date().getTime();
-
-                  // Fetch file
-                  const response = await fetch(message.mediaUrl);
-                  if (!response.ok) throw new Error("Failed to fetch file");
-
-                  const blob = await response.blob(); // Convert response to Blob
-
-                  const endTime = new Date().getTime();
-                  const timeTaken = endTime - startTime;
-
-                  saveAs(blob, "downloaded-file"); // Trigger file download
-                  console.log(`Time taken to download: ${timeTaken}ms`);
-                } catch (error) {
-                  console.error("Download failed:", error);
-                }
-              }}>
+            <div className="w-[100px] h-[100px] self-center mb-5 relative">
+              <div
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full p-[9px]"
+                style={{
+                  background: `conic-gradient(#22c55e ${percent}%, transparent ${percent}%)`,
+                }}>
+                <div
+                  className="z-40 absolute w-[30px] h-[30px] bg-black/50 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer"
+                  onClick={() => {
+                    if (controller) {
+                      controller.abort();
+                      setController(null);
+                      setPercent(0);
+                    } else {
+                      downloadFileWithProgress(message.mediaUrl);
+                    }
+                  }}></div>
+                <div className="z-30 absolute w-[30px] h-[30px] bg-white rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></div>
+                {controller ? (
+                  <Image
+                    src="/icons/cancel.png"
+                    alt="file"
+                    width={20}
+                    height={20}
+                    className="z-50 relative cursor-pointer"
+                    onClick={() => {
+                      if (controller) {
+                        controller.abort();
+                        setController(null);
+                        setPercent(0);
+                      }
+                    }}
+                  />
+                ) : (
+                  <Image
+                    src="/icons/download.png"
+                    alt="file"
+                    width={20}
+                    height={20}
+                    className="z-50 relative cursor-pointer"
+                    onClick={() => downloadFileWithProgress(message.mediaUrl)}
+                  />
+                )}
+              </div>
               <FileIcon
-                extension={message.messageType.split("/")[1]}
+                extension={getFileExtension()}
                 {...defaultStyles[
-                  message.messageType.split(
-                    "/"
-                  )[1] as keyof typeof defaultStyles
+                  getFileExtension() as keyof typeof defaultStyles
                 ]}
               />
             </div>
@@ -164,8 +208,8 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               alt="user"
               width={600}
               height={600}
-              onClick={() => saveAs(message.mediaUrl)}
-              className="cursor-pointer"
+              onClick={() => saveAs(message.mediaUrl, message.fileName)}
+              className="cursor-pointer max-w-[300px] max-h-[300px] object-contain rounded-lg"
             />
           ) : message.messageType.split("/")[0] == "video" ? (
             <video
@@ -173,32 +217,61 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               controls
               width="300"
               height="300"
-              onClick={() => saveAs(message.mediaUrl)}
               className="cursor-pointer"></video>
           ) : message.messageType.split("/")[0] == "audio" ? (
             <audio
               src={message.mediaUrl}
               controls
-              onClick={() => saveAs(message.mediaUrl)}
               className="cursor-pointer"></audio>
           ) : (
-            <div
-              className="w-[100px] h-[100px] self-center mb-5 cursor-pointer"
-              onClick={() =>
-                downloadFileWithProgress(
-                  message.mediaUrl,
-                  "file.exe",
-                  (progress) => {
-                    console.log(`Download progress: ${progress}%`);
-                  }
-                )
-              }>
+            <div className="w-[100px] h-[100px] self-center mb-5 relative">
+              <div
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full p-[9px]"
+                style={{
+                  background: `conic-gradient(#22c55e ${percent}%, transparent ${percent}%)`,
+                }}>
+                <div
+                  className="z-40 absolute w-[30px] h-[30px] bg-black/50 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer"
+                  onClick={() => {
+                    if (controller) {
+                      controller.abort();
+                      setController(null);
+                      setPercent(0);
+                    } else {
+                      downloadFileWithProgress(message.mediaUrl);
+                    }
+                  }}></div>
+                <div className="z-30 absolute w-[30px] h-[30px] bg-white rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></div>
+                {controller ? (
+                  <Image
+                    src="/icons/cancel.png"
+                    alt="file"
+                    width={20}
+                    height={20}
+                    className="z-50 relative cursor-pointer"
+                    onClick={() => {
+                      if (controller) {
+                        controller.abort();
+                        setController(null);
+                        setPercent(0);
+                      }
+                    }}
+                  />
+                ) : (
+                  <Image
+                    src="/icons/download.png"
+                    alt="file"
+                    width={20}
+                    height={20}
+                    className="z-50 relative cursor-pointer"
+                    onClick={() => downloadFileWithProgress(message.mediaUrl)}
+                  />
+                )}
+              </div>
               <FileIcon
-                extension={message.messageType.split("/")[1]}
+                extension={getFileExtension()}
                 {...defaultStyles[
-                  message.messageType.split(
-                    "/"
-                  )[1] as keyof typeof defaultStyles
+                  getFileExtension() as keyof typeof defaultStyles
                 ]}
               />
             </div>

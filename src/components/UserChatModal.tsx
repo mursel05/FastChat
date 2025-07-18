@@ -10,7 +10,8 @@ interface UserChatModalProps {
 }
 
 const UserChatModal: React.FC<UserChatModalProps> = ({ chat }) => {
-  const { users, user, setUsers, setCurrentChat } = useContext(DataContext);
+  const { users, user, setUsers, setCurrentChat, setOpenSettings } =
+    useContext(DataContext);
   const [otherUser, setOtherUser] = useState<UserType | undefined>();
 
   useEffect(() => {
@@ -35,6 +36,7 @@ const UserChatModal: React.FC<UserChatModalProps> = ({ chat }) => {
   }, []);
 
   function openChat() {
+    setOpenSettings(false);
     setCurrentChat(chat);
   }
 
@@ -44,10 +46,10 @@ const UserChatModal: React.FC<UserChatModalProps> = ({ chat }) => {
       className="flex items-center gap-4 py-3 px-4 hover:bg-[var(--light-grey)] cursor-pointer">
       <Image
         src={otherUser?.photo || "/images/no-profile.jpg"}
-        width={48}
-        height={48}
+        width={100}
+        height={100}
         alt="user"
-        className="rounded-full"
+        className="rounded-full w-[3rem] h-[3rem] object-cover"
       />
       <div className="flex flex-col gap-1 w-full">
         <div className="flex items-center justify-between">

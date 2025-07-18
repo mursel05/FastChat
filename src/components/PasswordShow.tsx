@@ -62,12 +62,12 @@ const PasswordShow = ({
   }, [showPassword]);
   return (
     <div
-      className={showShowPassword}
+      className={`${showShowPassword} bg-[#4148AA] rounded-full`}
       onClick={() => changeShowPassword(!showPassword)}>
       <div className="transition-all ease-linear duration-100 bg-blue w-7 cursor-pointer flex items-center justify-center h-7 rounded-full">
-        <span className={`text-white ${dot1} mb-1`}>{text1}</span>
-        <span className={`text-white ${dot2} mx-[1px] mb-1`}>{text2}</span>
-        <span className={`text-white ${dot3} mb-1`}>{text3}</span>
+        <span className={`text-white ${dot1}`}>{text1}</span>
+        <span className={`text-white ${dot2} mx-[1px]`}>{text2}</span>
+        <span className={`text-white ${dot3}`}>{text3}</span>
       </div>
     </div>
   );

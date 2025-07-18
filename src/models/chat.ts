@@ -4,7 +4,6 @@ type PersonType = {
   userId: string;
   role: string;
   joinedAt: Date;
-  deleteChat: boolean;
 };
 
 export type ChatType = {

@@ -12,10 +12,12 @@ export const DataContext = createContext({
   user: undefined as UserType | undefined,
   setUser: (user: UserType) => {},
   currentChat: undefined as ChatType | undefined,
-  setCurrentChat: (chat: ChatType) => {},
+  setCurrentChat: (chat: ChatType | undefined) => {},
   currentUser: undefined as UserType | undefined,
   setCurrentUser: (user: UserType) => {},
   messagesRef: { current: null as HTMLDivElement | null },
+  openSettings: false as Boolean,
+  setOpenSettings: (open: any) => {},
 });
 
 export const DataProvider = ({ children }: { children: ReactNode }) => {
@@ -24,6 +26,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserType>();
   const [currentChat, setCurrentChat] = useState<ChatType>();
   const [currentUser, setCurrentUser] = useState<UserType>();
+  const [openSettings, setOpenSettings] = useState<Boolean>(false);
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
   const contextData = {
@@ -38,6 +41,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     currentUser,
     setCurrentUser,
     messagesRef,
+    openSettings,
+    setOpenSettings,
   };
 
   return (

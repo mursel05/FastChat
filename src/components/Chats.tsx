@@ -9,7 +9,7 @@ import { UserType } from "@/models/user";
 import UserModal from "./UserModal";
 
 const Chats = () => {
-  const { chats, currentChat } = useContext(DataContext);
+  const { chats, currentChat, setOpenSettings } = useContext(DataContext);
   const [email, setEmail] = useState<string>("");
   const [searchUsers, setSearchUsers] = useState<UserType[]>([]);
 
@@ -30,13 +30,11 @@ const Chats = () => {
   return (
     <div className="flex flex-col w-max">
       <div className="flex items-center gap-7 py-4 px-6">
-        <Image
-          src="/icons/menu.png"
-          width={24}
-          height={24}
-          alt="menu"
-          className="cursor-pointer"
-        />
+        <div
+          className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2"
+          onClick={() => setOpenSettings((prev: Boolean) => !prev)}>
+          <Image src="/icons/menu.png" width={24} height={24} alt="menu" />
+        </div>
         <SearchBar email={email} setEmail={setEmail} />
       </div>
       <div className="flex flex-col">

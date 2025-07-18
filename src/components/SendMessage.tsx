@@ -3,6 +3,7 @@ import axiosInstance from "@/utils/axios";
 import Image from "next/image";
 import { useContext, useEffect, useRef, useState } from "react";
 import { FileIcon, defaultStyles } from "react-file-icon";
+import Swal from "sweetalert2";
 import { v4 as uuidv4 } from "uuid";
 
 const SendMessage = () => {
@@ -12,6 +13,40 @@ const SendMessage = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File>();
   const [showFile, setShowFile] = useState<File>();
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordStop, setRecordStop] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
+    null
+  );
+  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const recordingInterval = useRef<NodeJS.Timeout | null>(null);
+
+  function getFileExtension() {
+    if (file) {
+      const parts = file.name.split(".");
+      return parts.length > 1 ? parts.pop()?.toLowerCase() : "";
+    }
+  }
+
+  useEffect(() => {
+    if (!isRecording && audioChunks.length > 0 && recordStop) {
+      const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+      const audioFile = new File([audioBlob], `voice-${Date.now()}.webm`, {
+        type: "audio/webm",
+      });
+
+      setFile(audioFile);
+      setShowFile(audioFile);
+      setAudioChunks([]);
+    }
+  }, [isRecording, audioChunks]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   async function sendText() {
     try {
@@ -33,6 +68,7 @@ const SendMessage = () => {
                         sender: user?.id,
                         message: text,
                         mediaUrl: "",
+                        fileName: "",
                         messageType: "text",
                         deleteMessage: [],
                         seen: [],
@@ -50,6 +86,7 @@ const SendMessage = () => {
           chatId: currentChat?.id,
           message: text,
           mediaUrl: "",
+          fileName: "",
           messageType: "text",
         });
         messagesRef.current?.scrollTo({
@@ -57,6 +94,7 @@ const SendMessage = () => {
           behavior: "smooth",
         });
         setText("");
+        setShowText("");
       }
     } catch (error) {}
   }
@@ -73,6 +111,7 @@ const SendMessage = () => {
             chatId: currentChat?.id,
             message: text,
             mediaUrl: res.data.data.filePath,
+            fileName: res.data.data.fileName,
             messageType: res.data.data.fileType,
           });
           if (response.data.success) {
@@ -102,8 +141,9 @@ const SendMessage = () => {
                     chatId: currentChat?.id,
                     sender: user?.id,
                     message: text,
-                    mediaUrl: "",
-                    messageType: file.name.split(".")[1],
+                    mediaUrl: URL.createObjectURL(file),
+                    fileName: getFileExtension() || "",
+                    messageType: file.type,
                     deleteMessage: [],
                     seen: [],
                     reactions: [],
@@ -139,22 +179,139 @@ const SendMessage = () => {
     };
   }, [text]);
 
+  useEffect(() => {
+    return () => {
+      if (recordingInterval.current) {
+        clearInterval(recordingInterval.current);
+      }
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+      }
+    };
+  }, []);
+
+  const [audioLevels, setAudioLevels] = useState<number[]>(
+    new Array(30).fill(0)
+  );
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number>();
+
+  const startRecording = async () => {
+    try {
+      setIsRecording(true);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+
+      const audioContext = new AudioContext();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+
+      analyser.fftSize = 64;
+      analyser.smoothingTimeConstant = 0.8;
+
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
+      const updateAudioLevels = () => {
+        if (analyserRef.current) {
+          const dataArray = new Uint8Array(
+            analyserRef.current.frequencyBinCount
+          );
+          analyserRef.current.getByteFrequencyData(dataArray);
+
+          const levels = [];
+          for (let i = 0; i < 30; i++) {
+            const index = Math.floor((i / 30) * dataArray.length);
+            levels.push(dataArray[index] || 0);
+          }
+
+          setAudioLevels(levels);
+        }
+
+        animationFrameRef.current = requestAnimationFrame(updateAudioLevels);
+      };
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          setAudioChunks((prev) => [...prev, event.data]);
+        }
+      };
+
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        audioContext.close();
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
+        setAudioLevels(new Array(30).fill(0));
+        setRecordStop(true);
+      };
+
+      setMediaRecorder(recorder);
+      recorder.start();
+      setRecordingTime(0);
+
+      updateAudioLevels();
+
+      recordingInterval.current = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    } catch {
+      Swal.fire({
+        title: "Could not access microphone",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+
+      if (recordingInterval.current) {
+        clearInterval(recordingInterval.current);
+        recordingInterval.current = null;
+      }
+
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (recordingInterval.current) {
+        clearInterval(recordingInterval.current);
+      }
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
   if (showFile) {
     return (
       <div className="flex justify-center w-full relative">
         <div className="bg-white p-3 rounded-xl flex flex-col gap-2 absolute bottom-0">
           <div className="flex items-center justify-between gap-2">
-            <div className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
+            <div
+              className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2"
+              onClick={() => {
+                setFile(undefined);
+                setShowFile(undefined);
+              }}>
               <Image
                 src="/icons/dismis.png"
                 alt="dismis"
                 width={24}
                 height={24}
                 className="cursor-pointer"
-                onClick={() => {
-                  setFile(undefined);
-                  setShowFile(undefined);
-                }}
               />
             </div>
             <button
@@ -174,13 +331,16 @@ const SendMessage = () => {
           ) : file?.type.includes("audio") ? (
             <audio src={URL.createObjectURL(file)} controls></audio>
           ) : file?.type.includes("video") ? (
-            <video src={URL.createObjectURL(file)} controls></video>
+            <video
+              src={URL.createObjectURL(file)}
+              controls
+              className="max-h-[30rem]"></video>
           ) : (
             <div className="w-[100px] h-[100px] self-center mb-5">
               <FileIcon
-                extension={file?.name.split(".")[1]}
+                extension={getFileExtension()}
                 {...defaultStyles[
-                  file?.type.split("/")[1] as keyof typeof defaultStyles
+                  getFileExtension() as keyof typeof defaultStyles
                 ]}
               />
             </div>
@@ -212,27 +372,74 @@ const SendMessage = () => {
             }
           }}
         />
-        <div
-          onClick={() => fileRef.current?.click()}
-          className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
-          <Image src="/icons/file.png" width={24} height={24} alt="file" />
-        </div>
-        <input
-          autoFocus
-          type="text"
-          className="w-full outline-none text-[var(--navy-grey)] text-[16px] font-[400]"
-          placeholder="Message"
-          value={showText}
-          onChange={(e) => {
-            setText(e.target.value);
-            setShowText(e.target.value);
-          }}
-        />
-        <div
-          onClick={sendText}
-          className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
-          <Image src="/icons/send.png" width={24} height={24} alt="send" />
-        </div>
+        {isRecording ? (
+          <div className="p-2">
+            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+          </div>
+        ) : (
+          <div
+            onClick={() => fileRef.current?.click()}
+            className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
+            <Image src="/icons/file.png" width={24} height={24} alt="file" />
+          </div>
+        )}
+        {isRecording ? (
+          <div className="p-1">
+            <span className="text-[var(--navy-grey)] text-[16px] font-[400]">
+              {formatTime(recordingTime)}
+            </span>
+          </div>
+        ) : (
+          <div
+            onClick={startRecording}
+            className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
+            <Image
+              src="/icons/microphone.png"
+              width={24}
+              height={24}
+              alt="microphone"
+            />
+          </div>
+        )}
+        {!isRecording ? (
+          <input
+            autoFocus
+            type="text"
+            className="w-full outline-none text-[var(--navy-grey)] text-[16px] font-[400]"
+            placeholder="Message"
+            value={showText}
+            onChange={(e) => {
+              setText(e.target.value);
+              setShowText(e.target.value);
+            }}
+          />
+        ) : (
+          <div className="w-full flex gap-[2px] items-center justify-center h-6">
+            {audioLevels.map((level, index) => {
+              const height = Math.max(4, (level / 255) * 20 + 4);
+              return (
+                <div
+                  key={index}
+                  className="w-1 bg-[#8AACD7] rounded-xl transition-all duration-75"
+                  style={{ height: `${height}px` }}
+                />
+              );
+            })}
+          </div>
+        )}
+        {isRecording ? (
+          <div
+            onClick={stopRecording}
+            className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
+            <Image src="/icons/stop.png" width={24} height={24} alt="stop" />
+          </div>
+        ) : (
+          <div
+            onClick={sendText}
+            className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
+            <Image src="/icons/send.png" width={24} height={24} alt="send" />
+          </div>
+        )}
       </div>
     );
   }
