@@ -4,8 +4,15 @@ import Image from "next/image";
 import { useContext, useState } from "react";
 
 const ChatHeader = () => {
-  const { currentUser, setCurrentChat, currentChat, setChats } =
-    useContext(DataContext);
+  const {
+    currentUser,
+    setCurrentChat,
+    currentChat,
+    setChats,
+    call,
+    startCall,
+    setOpen,
+  } = useContext(DataContext);
   const [isOpen, setIsOpen] = useState(false);
 
   const formatLastSeen = (lastSeen: string) => {
@@ -70,7 +77,9 @@ const ChatHeader = () => {
         <div className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
           <Image src="/icons/search.png" width={35} height={35} alt="search" />
         </div>
-        <div className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
+        <div
+          className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2"
+          onClick={() => (call ? setOpen("call") : startCall(currentUser?.id))}>
           <Image src="/icons/call.png" width={35} height={35} alt="phone" />
         </div>
         <div

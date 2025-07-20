@@ -1,4 +1,6 @@
 "use client";
+import Answering from "@/components/Answering";
+import Calling from "@/components/Calling";
 import ChatHeader from "@/components/ChatHeader";
 import Chats from "@/components/Chats";
 import Messages from "@/components/Messages";
@@ -10,7 +12,7 @@ import { wsHandler } from "@/utils/ws";
 import { useContext } from "react";
 
 const Home = () => {
-  const { currentChat, openSettings } = useContext(DataContext);
+  const { currentChat, open, call } = useContext(DataContext);
   wsHandler();
   useEffects();
 
@@ -18,7 +20,13 @@ const Home = () => {
     <div className="flex h-screen">
       <Chats />
       <div className="flex flex-col flex-1 bg-[var(--iceberg-blue)] bg-[url('/images/bg-image.png')]">
-        {openSettings ? (
+        {open == "call" ? (
+          call === "calling" ? (
+            <Calling />
+          ) : (
+            <Answering />
+          )
+        ) : open == "settings" ? (
           <Settings />
         ) : (
           currentChat && (

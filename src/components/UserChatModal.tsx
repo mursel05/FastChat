@@ -10,7 +10,7 @@ interface UserChatModalProps {
 }
 
 const UserChatModal: React.FC<UserChatModalProps> = ({ chat }) => {
-  const { users, user, setUsers, setCurrentChat, setOpenSettings } =
+  const { users, user, setUsers, setCurrentChat, setOpen } =
     useContext(DataContext);
   const [otherUser, setOtherUser] = useState<UserType | undefined>();
 
@@ -36,7 +36,7 @@ const UserChatModal: React.FC<UserChatModalProps> = ({ chat }) => {
   }, []);
 
   function openChat() {
-    setOpenSettings(false);
+    setOpen("");
     setCurrentChat(chat);
   }
 

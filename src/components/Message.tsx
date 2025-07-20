@@ -120,7 +120,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               width={600}
               height={600}
               onClick={() => saveAs(message.mediaUrl)}
-              className="cursor-pointer"
+              className="cursor-pointer max-w-[300px] max-h-[300px] object-contain rounded-lg"
             />
           ) : message.messageType.split("/")[0] == "video" ? (
             <video

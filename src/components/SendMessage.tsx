@@ -14,7 +14,6 @@ const SendMessage = () => {
   const [file, setFile] = useState<File>();
   const [showFile, setShowFile] = useState<File>();
   const [isRecording, setIsRecording] = useState(false);
-  const [recordStop, setRecordStop] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
     null
   );
@@ -30,7 +29,7 @@ const SendMessage = () => {
   }
 
   useEffect(() => {
-    if (!isRecording && audioChunks.length > 0 && recordStop) {
+    if (!isRecording && audioChunks.length > 0) {
       const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
       const audioFile = new File([audioBlob], `voice-${Date.now()}.webm`, {
         type: "audio/webm",
@@ -244,7 +243,6 @@ const SendMessage = () => {
           cancelAnimationFrame(animationFrameRef.current);
         }
         setAudioLevels(new Array(30).fill(0));
-        setRecordStop(true);
       };
 
       setMediaRecorder(recorder);

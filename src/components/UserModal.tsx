@@ -10,7 +10,7 @@ interface UserModalProps {
 }
 
 const UserModal: React.FC<UserModalProps> = ({ user }) => {
-  const { setChats, setCurrentChat, chats, setUsers, setOpenSettings } =
+  const { setChats, setCurrentChat, chats, setUsers, setOpen } =
     useContext(DataContext);
 
   async function createChat() {
@@ -31,7 +31,7 @@ const UserModal: React.FC<UserModalProps> = ({ user }) => {
     const currentChat = chats.find((chat) =>
       chat.persons.some((p) => p.userId === user.id)
     );
-    setOpenSettings(false);
+    setOpen("");
     if (currentChat) {
       setCurrentChat(currentChat);
     } else {

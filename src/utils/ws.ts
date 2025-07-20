@@ -1,15 +1,22 @@
 import { DataContext } from "@/context/ApiContext";
-import { useContext, useEffect, useState } from "react";
-import useWebSocket from "react-use-websocket";
+import { useContext, useEffect } from "react";
 import axiosInstance from "./axios";
 
 export const wsHandler = () => {
-  const { setChats, setUsers, user, chats } = useContext(DataContext);
-  const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "";
-  const { lastMessage } = useWebSocket(wsUrl, {
-    share: false,
-    shouldReconnect: () => true,
-  });
+  const {
+    setChats,
+    setUsers,
+    user,
+    chats,
+    pcRef,
+    setCall,
+    setOpen,
+    lastMessage,
+    setCallingUserId,
+    setOffer,
+    localVideoRef,
+    remoteVideoRef,
+  } = useContext(DataContext);
 
   useEffect(() => {
     async function getChat(id: string) {
@@ -72,6 +79,45 @@ export const wsHandler = () => {
       );
     }
 
+    async function handleCallOffer(res: any) {
+      setOpen("call");
+      setCall("calling");
+      setCallingUserId(res.data.userId);
+      setOffer(res.data.offer);
+    }
+
+    async function handleCallAnswer(res: any) {
+      setCall("answering");
+      if (pcRef.current)
+        await pcRef.current.setRemoteDescription(res.data.answer);
+    }
+
+    async function handleCallCandidate(res: any) {
+      if (pcRef.current)
+        if (pcRef.current)
+          await pcRef.current.addIceCandidate(res.data.candidate);
+    }
+
+    async function handleCallEnd() {
+      setCall("");
+      setOpen("");
+      setCallingUserId("");
+      if (localVideoRef.current?.srcObject) {
+        const localStream = localVideoRef.current.srcObject as MediaStream;
+        localStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+        localVideoRef.current.srcObject = null;
+      }
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = null;
+      }
+      if (pcRef.current) {
+        pcRef.current.close();
+        pcRef.current = null;
+      }
+    }
+
     if (lastMessage !== null) {
       const res = JSON.parse(lastMessage.data);
 
@@ -85,6 +131,14 @@ export const wsHandler = () => {
         handleMessage(res);
       } else if (res.type === "seen") {
         handleSeen(res);
+      } else if (res.type === "callOffer") {
+        handleCallOffer(res);
+      } else if (res.type === "callAnswer") {
+        handleCallAnswer(res);
+      } else if (res.type === "callCandidate") {
+        handleCallCandidate(res);
+      } else if (res.type === "callEnd") {
+        handleCallEnd();
       }
     }
   }, [lastMessage]);
