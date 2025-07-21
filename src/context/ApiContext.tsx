@@ -154,6 +154,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         data: { userId: callingUserId },
       })
     );
+    setCallingUserId("");
   };
 
   const contextData = {

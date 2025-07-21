@@ -10,7 +10,7 @@ const Calling = () => {
   useEffect(() => {
     async function getUser() {
       try {
-        const res = await axiosInstance.get(`users/id/${callingUserId}`);
+        const res = await axiosInstance.get(`/users/id/${callingUserId}`);
         if (res.data.success) {
           setCallingUser(res.data.data);
         }

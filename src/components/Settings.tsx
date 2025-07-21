@@ -4,6 +4,7 @@ import axiosInstance from "@/utils/axios";
 import Image from "next/image";
 import React, { useContext, useRef, useState } from "react";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 
 const Settings = () => {
   const { user } = useContext(DataContext);
@@ -15,6 +16,7 @@ const Settings = () => {
     surname: user?.surname || "",
     photo: user?.photo || "",
   });
+  const router = useRouter();
 
   async function uploadImage() {
     if (file) {
@@ -48,6 +50,15 @@ const Settings = () => {
           icon: "success",
           confirmButtonText: "OK",
         });
+      }
+    } catch {}
+  }
+
+  async function logOut() {
+    try {
+      const res = await axiosInstance.post("/users/logout");
+      if (res.data.success) {
+        document.location.reload();
       }
     } catch {}
   }
@@ -113,6 +124,12 @@ const Settings = () => {
         />
         <button className="self-center py-2 w-full bg-blue-500 cursor-pointer text-white rounded-xl hover:bg-blue-600">
           Save
+        </button>
+        <button
+          type="button"
+          className="self-center py-2 w-full bg-red-500 cursor-pointer text-white rounded-xl hover:bg-red-600"
+          onClick={logOut}>
+          Log Out
         </button>
       </form>
     </div>

@@ -6,6 +6,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showShowPassword, setShowShowPassword] = useState<string>("invisible");
@@ -18,8 +24,8 @@ const SignUp = () => {
   const [emailError, setEmailError] = useState<string>("invisible");
   const [password, setPassword] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("invisible");
-  const [err, setErr] = useState<string>("Incorrect Email");
   const router = useRouter();
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   function changeShowPassword(par: boolean) {
     setShowPassword(par);
@@ -68,6 +74,50 @@ const SignUp = () => {
     } else setPasswordError("invisible");
     createUser();
   }
+
+  useEffect(() => {
+    const initializeGoogleSignIn = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleCredentialResponse,
+        });
+
+        window.google.accounts.id.renderButton(
+          document.getElementById("google-signin-button"),
+          {
+            theme: "outline",
+            size: "large",
+            type: "icon",
+            shape: "circle",
+            width: 50,
+          }
+        );
+      }
+    };
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = initializeGoogleSignIn;
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  const handleCredentialResponse = async (response: any) => {
+    try {
+      const res = await axiosInstance.post("/users/google-signup", {
+        token: response.credential,
+      });
+      if (res.data.success) {
+        router.push("/");
+      }
+    } catch (error) {}
+  };
 
   return (
     <div className="btn-blue-pink h-[100vh] flex flex-col items-center justify-center">
@@ -144,7 +194,6 @@ const SignUp = () => {
                     placeholder="Type your email"
                   />
                 </div>
-                <span className={`dark-red text-xs ${emailError}`}>{err}</span>
               </div>
             </div>
             <div className="flex flex-col gap-1">
@@ -185,13 +234,9 @@ const SignUp = () => {
               Or Sign Up Using
             </span>
             <div className="flex gap-2">
-              <Image
-                className="cursor-pointer"
-                src="/icons/google.png"
-                width={30}
-                height={30}
-                alt="google"
-              />
+              <div
+                id="google-signin-button"
+                className="flex justify-center"></div>
             </div>
           </div>
         </div>
