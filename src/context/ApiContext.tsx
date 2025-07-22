@@ -1,7 +1,7 @@
 "use client";
 import { ChatType } from "@/models/chat";
 import { UserType } from "@/models/user";
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useRef, useState } from "react";
 import { ReactNode } from "react";
 import useWebSocket from "react-use-websocket";
 
@@ -47,8 +47,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [call, setCall] = useState<string>("");
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
-  const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "";
-  const { lastMessage, sendMessage } = useWebSocket(wsUrl, {
+  const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+  const { lastMessage, sendMessage } = useWebSocket(wsUrl as string, {
     share: false,
     shouldReconnect: () => true,
   });
