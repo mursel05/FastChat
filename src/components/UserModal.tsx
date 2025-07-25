@@ -52,7 +52,7 @@ const UserModal: React.FC<UserModalProps> = ({ user }) => {
       />
       <div className="flex flex-col gap-1 w-full">
         <div className="flex items-center justify-between">
-          <span className="text-[16px] font-[600]">{user?.name}</span>
+          <span className="text-[1rem] font-[600]">{user?.name}</span>
         </div>
       </div>
     </div>

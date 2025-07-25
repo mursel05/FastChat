@@ -35,7 +35,13 @@ const Chats = () => {
           onClick={() =>
             setOpen((prev: string) => (prev === "settings" ? "" : "settings"))
           }>
-          <Image src="/icons/menu.png" width={24} height={24} alt="menu" />
+          <Image
+            src="/icons/menu.png"
+            width={24}
+            height={24}
+            alt="menu"
+            className="w-6 h-6"
+          />
         </div>
         <SearchBar email={email} setEmail={setEmail} />
       </div>

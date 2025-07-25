@@ -14,6 +14,15 @@
   --dark-grey: #d1cece;
 }
 
+html {
+  scroll-behavior: smooth;
+  font-size: 1.112vw;
+
+  @media (max-width: 640px) {
+    font-size: 4.27vw;
+  }
+}
+
 @layer utilities {
   .login-input:focus {
     outline: none;

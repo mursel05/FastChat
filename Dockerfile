@@ -9,7 +9,7 @@ RUN npm run build
 
 WORKDIR /backend
 RUN git clone https://github.com/mursel05/FastChat-back.git .
-RUN npm install 
+RUN npm install
 
 COPY nginx.conf /etc/nginx/nginx.conf
 

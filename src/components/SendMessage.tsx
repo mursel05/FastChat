@@ -309,12 +309,12 @@ const SendMessage = () => {
                 alt="dismis"
                 width={24}
                 height={24}
-                className="cursor-pointer"
+                className="cursor-pointer w-6 h-6"
               />
             </div>
             <button
               onClick={sendFile}
-              className="text-white bg-[var(--light-green)] text-[16px] font-[400] rounded-3xl px-3 py-1">
+              className="text-white bg-[var(--light-green)] text-[1rem] font-[400] rounded-3xl px-3 py-1">
               SEND
             </button>
           </div>
@@ -324,7 +324,7 @@ const SendMessage = () => {
               alt="dismis"
               width={200}
               height={200}
-              className="w-full h-full max-w-[600px] max-h-[600px] self-center"
+              className="w-full h-full max-w-[37.5rem] max-h-[37.5rem] self-center"
             />
           ) : file?.type.includes("audio") ? (
             <audio src={URL.createObjectURL(file)} controls></audio>
@@ -334,7 +334,7 @@ const SendMessage = () => {
               controls
               className="max-h-[30rem]"></video>
           ) : (
-            <div className="w-[100px] h-[100px] self-center mb-5">
+            <div className="w-[6.25rem] h-[6.25rem] self-center mb-5">
               <FileIcon
                 extension={getFileExtension()}
                 {...defaultStyles[
@@ -345,7 +345,7 @@ const SendMessage = () => {
           )}
           <input
             type="text"
-            className="border-[var(--light-blue-grey)] p-2 outline-none border rounded-xl text-[var(--navy-grey)] text-[16px] font-[400]"
+            className="border-[var(--light-blue-grey)] p-2 outline-none border rounded-xl text-[var(--navy-grey)] text-[1rem] font-[400]"
             placeholder="Caption"
             value={showText}
             onChange={(e) => {
@@ -378,12 +378,18 @@ const SendMessage = () => {
           <div
             onClick={() => fileRef.current?.click()}
             className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
-            <Image src="/icons/file.png" width={24} height={24} alt="file" />
+            <Image
+              src="/icons/file.png"
+              width={24}
+              height={24}
+              alt="file"
+              className="w-6 h-6 object-contain"
+            />
           </div>
         )}
         {isRecording ? (
           <div className="p-1">
-            <span className="text-[var(--navy-grey)] text-[16px] font-[400]">
+            <span className="text-[var(--navy-grey)] text-[1rem] font-[400]">
               {formatTime(recordingTime)}
             </span>
           </div>
@@ -396,6 +402,7 @@ const SendMessage = () => {
               width={24}
               height={24}
               alt="microphone"
+              className="w-6 h-6 object-contain"
             />
           </div>
         )}
@@ -403,7 +410,7 @@ const SendMessage = () => {
           <input
             autoFocus
             type="text"
-            className="w-full outline-none text-[var(--navy-grey)] text-[16px] font-[400]"
+            className="w-full outline-none text-[var(--navy-grey)] text-[1rem] font-[400]"
             placeholder="Message"
             value={showText}
             onChange={(e) => {
@@ -412,7 +419,7 @@ const SendMessage = () => {
             }}
           />
         ) : (
-          <div className="w-full flex gap-[2px] items-center justify-center h-6">
+          <div className="w-full flex gap-[0.125rem] items-center justify-center h-6">
             {audioLevels.map((level, index) => {
               const height = Math.max(4, (level / 255) * 20 + 4);
               return (
@@ -429,13 +436,25 @@ const SendMessage = () => {
           <div
             onClick={stopRecording}
             className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
-            <Image src="/icons/stop.png" width={24} height={24} alt="stop" />
+            <Image
+              src="/icons/stop.png"
+              width={24}
+              height={24}
+              alt="stop"
+              className="w-6 h-6 object-contain"
+            />
           </div>
         ) : (
           <div
             onClick={sendText}
             className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2">
-            <Image src="/icons/send.png" width={24} height={24} alt="send" />
+            <Image
+              src="/icons/send.png"
+              width={24}
+              height={24}
+              alt="send"
+              className="w-6 h-6 object-contain"
+            />
           </div>
         )}
       </div>

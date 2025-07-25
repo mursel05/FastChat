@@ -53,9 +53,9 @@ const UserChatModal: React.FC<UserChatModalProps> = ({ chat }) => {
       />
       <div className="flex flex-col gap-1 w-full">
         <div className="flex items-center justify-between">
-          <span className="text-[16px] font-[600]">{otherUser?.name}</span>
+          <span className="text-[1rem] font-[600]">{otherUser?.name}</span>
           {chat.messages[chat.messages.length - 1] && (
-            <span className="text-[var(--navy-grey)] text-[12px] font-[400]">
+            <span className="text-[var(--navy-grey)] text-[0.75rem] font-[400]">
               {new Date(
                 chat.messages[chat.messages.length - 1].createdAt
               ).getDate() == new Date().getDate()
@@ -74,11 +74,11 @@ const UserChatModal: React.FC<UserChatModalProps> = ({ chat }) => {
         </div>
         {chat.messages[chat.messages.length - 1] && (
           <div className="flex items-center justify-between">
-            <span className="text-[var(--navy-grey)] text-[16px] font-[400] truncate max-w-[250px]">
+            <span className="text-[var(--navy-grey)] text-[1rem] font-[400] truncate max-w-[15.625rem]">
               {chat.messages[chat.messages.length - 1].message}
             </span>
             {chat.unSeenMessages ? (
-              <div className="bg-[var(--light-green)] text-[12px] font-[400] rounded-full text-white w-5 h-5 flex items-center justify-center">
+              <div className="bg-[var(--light-green)] text-[0.75rem] font-[400] rounded-full text-white w-5 h-5 flex items-center justify-center">
                 <span>{chat.unSeenMessages}</span>
               </div>
             ) : (

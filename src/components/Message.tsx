@@ -120,7 +120,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               width={600}
               height={600}
               onClick={() => saveAs(message.mediaUrl)}
-              className="cursor-pointer max-w-[300px] max-h-[300px] object-contain rounded-lg"
+              className="cursor-pointer max-w-[18.75rem] max-h-[18.75rem] object-contain rounded-lg"
             />
           ) : message.messageType.split("/")[0] == "video" ? (
             <video
@@ -135,14 +135,14 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               controls
               className="cursor-pointer"></audio>
           ) : (
-            <div className="w-[100px] h-[100px] self-center mb-5 relative">
+            <div className="w-[6.25rem] h-[6.25rem] self-center mb-5 relative">
               <div
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full p-[9px]"
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full p-[0.5625rem]"
                 style={{
                   background: `conic-gradient(#22c55e ${percent}%, transparent ${percent}%)`,
                 }}>
                 <div
-                  className="z-40 absolute w-[30px] h-[30px] bg-black/50 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer"
+                  className="z-40 absolute w-[1.875rem] h-[1.875rem] bg-black/50 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer"
                   onClick={() => {
                     if (controller) {
                       controller.abort();
@@ -152,14 +152,14 @@ const Message: React.FC<MessageProps> = ({ message }) => {
                       downloadFileWithProgress(message.mediaUrl);
                     }
                   }}></div>
-                <div className="z-30 absolute w-[30px] h-[30px] bg-white rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></div>
+                <div className="z-30 absolute w-[1.875rem] h-[1.875rem] bg-white rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></div>
                 {controller ? (
                   <Image
                     src="/icons/cancel.png"
                     alt="file"
                     width={20}
                     height={20}
-                    className="z-50 relative cursor-pointer"
+                    className="z-50 relative cursor-pointer w-[1.25rem] h-[1.25rem]"
                     onClick={() => {
                       if (controller) {
                         controller.abort();
@@ -174,7 +174,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
                     alt="file"
                     width={20}
                     height={20}
-                    className="z-50 relative cursor-pointer"
+                    className="z-50 relative cursor-pointer w-[1.25rem] h-[1.25rem]"
                     onClick={() => downloadFileWithProgress(message.mediaUrl)}
                   />
                 )}
@@ -187,10 +187,10 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               />
             </div>
           ))}
-        <span className="font-[400] text-[16px]">{message.message}</span>
+        <span className="font-[400] text-[1rem]">{message.message}</span>
         <div className="self-end flex gap-2 items-center">
           {/* <span>❤️</span> */}
-          <span className="text-[12px] font-[400] mt-1">
+          <span className="text-[0.75rem] font-[400] mt-1">
             {new Date(message.createdAt).toLocaleTimeString("en-US", {
               hour: "numeric",
               minute: "numeric",
@@ -209,7 +209,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               width={600}
               height={600}
               onClick={() => saveAs(message.mediaUrl, message.fileName)}
-              className="cursor-pointer max-w-[300px] max-h-[300px] object-contain rounded-lg"
+              className="cursor-pointer max-w-[18.75rem] max-h-[18.75rem] object-contain rounded-lg"
             />
           ) : message.messageType.split("/")[0] == "video" ? (
             <video
@@ -224,14 +224,14 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               controls
               className="cursor-pointer"></audio>
           ) : (
-            <div className="w-[100px] h-[100px] self-center mb-5 relative">
+            <div className="w-[6.25rem] h-[6.25rem] self-center mb-5 relative">
               <div
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full p-[9px]"
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full p-[0.5625rem]"
                 style={{
                   background: `conic-gradient(#22c55e ${percent}%, transparent ${percent}%)`,
                 }}>
                 <div
-                  className="z-40 absolute w-[30px] h-[30px] bg-black/50 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer"
+                  className="z-40 absolute w-[1.875rem] h-[1.875rem] bg-black/50 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer"
                   onClick={() => {
                     if (controller) {
                       controller.abort();
@@ -241,14 +241,14 @@ const Message: React.FC<MessageProps> = ({ message }) => {
                       downloadFileWithProgress(message.mediaUrl);
                     }
                   }}></div>
-                <div className="z-30 absolute w-[30px] h-[30px] bg-white rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></div>
+                <div className="z-30 absolute w-[1.875rem] h-[1.875rem] bg-white rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></div>
                 {controller ? (
                   <Image
                     src="/icons/cancel.png"
                     alt="file"
                     width={20}
                     height={20}
-                    className="z-50 relative cursor-pointer"
+                    className="z-50 relative cursor-pointer w-[1.25rem] h-[1.25rem]"
                     onClick={() => {
                       if (controller) {
                         controller.abort();
@@ -263,7 +263,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
                     alt="file"
                     width={20}
                     height={20}
-                    className="z-50 relative cursor-pointer"
+                    className="z-50 relative cursor-pointer w-[1.25rem] h-[1.25rem]"
                     onClick={() => downloadFileWithProgress(message.mediaUrl)}
                   />
                 )}
@@ -276,10 +276,10 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               />
             </div>
           ))}
-        <span className="font-[400] text-[16px]">{message.message}</span>
+        <span className="font-[400] text-[1rem]">{message.message}</span>
         <div className="self-end flex gap-2 items-center">
           {/* <span>❤️</span> */}
-          <span className="text-[12px] font-[400] mt-1 text-white">
+          <span className="text-[0.75rem] font-[400] mt-1 text-white">
             {new Date(message.createdAt).toLocaleTimeString("en-US", {
               hour: "numeric",
               minute: "numeric",

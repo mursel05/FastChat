@@ -28,25 +28,25 @@ const PasswordShow = ({
       setTimeout(() => {
         setDot3("invisible text-xl");
         setText1("3");
-        setDot1("text-[10px]");
+        setDot1("text-[0.625rem]");
       }, 300);
       setTimeout(() => {
         setText2("y");
-        setDot2("text-[10px]");
+        setDot2("text-[0.625rem]");
       }, 400);
       setTimeout(() => {
         setText3("3");
-        setDot3("text-[10px]");
+        setDot3("text-[0.625rem]");
       }, 500);
     } else {
       setTimeout(() => {
-        setDot1("invisible text-[10px]");
+        setDot1("invisible text-[0.625rem]");
       }, 100);
       setTimeout(() => {
-        setDot2("invisible text-[10px]");
+        setDot2("invisible text-[0.625rem]");
       }, 200);
       setTimeout(() => {
-        setDot3("invisible text-[10px]");
+        setDot3("invisible text-[0.625rem]");
         setText1("∙");
         setDot1("text-xl");
       }, 300);
@@ -66,7 +66,7 @@ const PasswordShow = ({
       onClick={() => changeShowPassword(!showPassword)}>
       <div className="transition-all ease-linear duration-100 bg-blue w-7 cursor-pointer flex items-center justify-center h-7 rounded-full">
         <span className={`text-white ${dot1}`}>{text1}</span>
-        <span className={`text-white ${dot2} mx-[1px]`}>{text2}</span>
+        <span className={`text-white ${dot2} mx-[0.0625rem]`}>{text2}</span>
         <span className={`text-white ${dot3}`}>{text3}</span>
       </div>
     </div>

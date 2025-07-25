@@ -53,7 +53,7 @@ const ResetPassword = () => {
     <div className="btn-blue-pink h-[100vh] flex flex-col items-center justify-center">
       <form
         onSubmit={handleForm}
-        className="bg-white border-[1px] rounded-lg flex items-center flex-col  w-[400px] p-7 ">
+        className="bg-white border rounded-lg flex items-center flex-col  w-[25rem] p-7 ">
         <div className="flex flex-col items-center gap-5">
           <h1 className="text-2xl font-bold">Reset Password</h1>
           <div className="flex flex-col gap-3">
@@ -66,6 +66,7 @@ const ResetPassword = () => {
                     width={24}
                     height={24}
                     alt="password"
+                    className="w-6 h-6"
                   />
                   <input
                     onChange={(e) => setPassword(e.target.value)}

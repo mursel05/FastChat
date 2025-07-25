@@ -16,6 +16,8 @@ export const wsHandler = () => {
     setOffer,
     localVideoRef,
     remoteVideoRef,
+    setCallingUserCamera,
+    setCallingUserMicrophone,
   } = useContext(DataContext);
 
   useEffect(() => {
@@ -139,6 +141,10 @@ export const wsHandler = () => {
         handleCallCandidate(res);
       } else if (res.type === "callEnd") {
         handleCallEnd();
+      } else if (res.type === "callCamera") {
+        setCallingUserCamera(res.data.allowCamera);
+      } else if (res.type === "callMicrophone") {
+        setCallingUserMicrophone(res.data.allowMicrophone);
       }
     }
   }, [lastMessage]);

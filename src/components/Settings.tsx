@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 
 const Settings = () => {
-  const { user } = useContext(DataContext);
+  const { user, setOpen } = useContext(DataContext);
   const [hover, setHover] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -102,6 +102,7 @@ const Settings = () => {
                 width={24}
                 height={24}
                 alt="upload icon"
+                className="w-6 h-6"
               />
             </div>
           )}
@@ -122,8 +123,16 @@ const Settings = () => {
             setFormData({ ...formData, surname: e.target.value })
           }
         />
-        <button className="self-center py-2 w-full bg-blue-500 cursor-pointer text-white rounded-xl hover:bg-blue-600">
+        <button
+          type="submit"
+          className="self-center py-2 w-full bg-blue-500 cursor-pointer text-white rounded-xl hover:bg-blue-600">
           Save
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen("")}
+          className="self-center py-2 w-full bg-gray-500 cursor-pointer text-white rounded-xl hover:bg-gray-600">
+          Cancel
         </button>
         <button
           type="button"

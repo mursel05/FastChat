@@ -8,11 +8,17 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({ email, setEmail }) => {
   return (
     <div className="flex items-center gap-2 bg-[var(--light-grey)] rounded-3xl p-2 px-4">
-      <Image src="/icons/search.png" width={24} height={24} alt="search" />
+      <Image
+        src="/icons/search.png"
+        width={24}
+        height={24}
+        alt="search"
+        className="w-6 h-6"
+      />
       <input
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="bg-[var(--light-grey)] text-[16px] font-[400] text-[var(--navy-grey)] placeholder-[var(--navy-grey)] focus:outline-none"
+        className="bg-[var(--light-grey)] text-[1rem] font-[400] text-[var(--navy-grey)] placeholder-[var(--navy-grey)] focus:outline-none"
         type="text"
         placeholder="Search"
       />

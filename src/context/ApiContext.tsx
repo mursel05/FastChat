@@ -4,6 +4,7 @@ import { UserType } from "@/models/user";
 import { createContext, useRef, useState } from "react";
 import { ReactNode } from "react";
 import useWebSocket from "react-use-websocket";
+import Swal from "sweetalert2";
 
 export const DataContext = createContext({
   chats: [] as ChatType[],
@@ -33,6 +34,14 @@ export const DataContext = createContext({
   endCall: () => {},
   offer: undefined as RTCSessionDescriptionInit | undefined,
   setOffer: (offer: RTCSessionDescriptionInit | undefined) => {},
+  allowMicrophone: true,
+  toggleCamera: async () => {},
+  allowCamera: true,
+  toggleMicrophone: () => {},
+  callingUserCamera: true,
+  callingUserMicrophone: true,
+  setCallingUserCamera: (camera: boolean) => {},
+  setCallingUserMicrophone: (microphone: boolean) => {},
 });
 
 export const DataProvider = ({ children }: { children: ReactNode }) => {
@@ -54,14 +63,19 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   });
   const [callingUserId, setCallingUserId] = useState<string>("");
   const [offer, setOffer] = useState<RTCSessionDescriptionInit>();
+  const [allowMicrophone, setAllowMicrophone] = useState<boolean>(true);
+  const [allowCamera, setAllowCamera] = useState<boolean>(true);
+  const [callingUserCamera, setCallingUserCamera] = useState<boolean>(true);
+  const [callingUserMicrophone, setCallingUserMicrophone] =
+    useState<boolean>(true);
 
   const startCall = async (userId: string | undefined) => {
     setOpen("call");
     setCall("answering");
     setCallingUserId(userId || "");
     const localStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
+      video: allowCamera,
+      audio: allowMicrophone,
     });
 
     localVideoRef.current!.srcObject = localStream;
@@ -101,8 +115,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     pcRef.current = pc;
 
     const localStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
+      video: allowCamera,
+      audio: allowMicrophone,
     });
     localVideoRef.current!.srcObject = localStream;
     localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
@@ -157,6 +171,58 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     setCallingUserId("");
   };
 
+  const toggleCamera = async () => {
+    try {
+      if (!pcRef.current || !localVideoRef.current?.srcObject) {
+        return;
+      }
+      const localStream = localVideoRef.current.srcObject as MediaStream;
+      const videoTrack = localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !allowCamera;
+        setAllowCamera(!allowCamera);
+        sendMessage(
+          JSON.stringify({
+            type: "callCamera",
+            data: { userId: callingUserId, allowCamera: !allowCamera },
+          })
+        );
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error toggling camera",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  const toggleMicrophone = () => {
+    try {
+      if (!localVideoRef.current?.srcObject) {
+        return;
+      }
+      const localStream = localVideoRef.current.srcObject as MediaStream;
+      const audioTrack = localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !allowMicrophone;
+        setAllowMicrophone(!allowMicrophone);
+        sendMessage(
+          JSON.stringify({
+            type: "callMicrophone",
+            data: { userId: callingUserId, allowMicrophone: !allowMicrophone },
+          })
+        );
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error toggling microphone",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
   const contextData = {
     chats,
     setChats,
@@ -185,6 +251,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     endCall,
     offer,
     setOffer,
+    allowMicrophone,
+    toggleCamera,
+    allowCamera,
+    toggleMicrophone,
+    callingUserCamera,
+    callingUserMicrophone,
+    setCallingUserCamera,
+    setCallingUserMicrophone,
   };
 
   return (
