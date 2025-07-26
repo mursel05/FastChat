@@ -16,6 +16,7 @@ const Answering = () => {
     callingUserCamera,
     callingUserMicrophone,
     callingUserId,
+    user
   } = useContext(DataContext);
   const [callingUser, setCallingUser] = useState<UserType | null>(null);
 
@@ -33,38 +34,40 @@ const Answering = () => {
   }, [callingUserId]);
 
   return (
-    <div className="h-screen relative flex w-full justify-center">
-      <div className="h-full relative">
+    <div className="h-full relative flex w-full justify-center items-center">
+      <div className="relative">
         <video
           ref={remoteVideoRef}
           autoPlay
-          className="h-full"
-          style={{ display: callingUserCamera ? "block" : "none" }}
+          className="w-[50rem] max-lg:w-[20rem] h-full object-cover rounded-lg"
+          style={{
+            display: callingUserCamera ? "block" : "none",
+          }}
         />
         {!callingUserMicrophone && (
-          <div className="absolute bottom-4 left-8 transform rounded-full bg-white/40 p-2">
+          <div className="absolute bottom-4 max-lg:bottom-2 left-4 max-lg:left-2 transform rounded-full bg-white/40 p-2">
             <Image
               src="/icons/call-microphone.png"
               alt="Mute"
               width={24}
               height={24}
-              className="w-6 h-6"
+              className="w-6 h-6 max-lg:w-4 max-lg:h-4"
             />
             <div className="top-0 left-1/2 -translate-x-1/2 w-[0.1rem] h-full bg-black absolute rotate-45 rounded-xl"></div>
           </div>
         )}
+        {!callingUserCamera && (
+          <div className="flex items-center justify-center bg-[rgba(0,0,0,0.5)] h-[20rem] max-lg:h-[10rem] w-[30rem] max-lg:w-[15rem] rounded-lg">
+            <Image
+              src={user?.photo || "/images/no-profile.jpg"}
+              width={100}
+              height={100}
+              alt="user"
+              className="rounded-full w-[5rem] h-[5rem] object-cover max-lg:w-[3rem] max-lg:h-[3rem]"
+            />
+          </div>
+        )}
       </div>
-      {!callingUserCamera && (
-        <div className="w-full h-full flex items-center justify-center bg-[rgba(0,0,0,0.5)]">
-          <Image
-            src={callingUser?.photo || "/images/no-profile.jpg"}
-            width={100}
-            height={100}
-            alt="user"
-            className="rounded-full w-[3rem] h-[3rem] object-cover"
-          />
-        </div>
-      )}
       <div className="absolute bottom-4 right-1/2 transform translate-x-1/2 flex gap-4">
         <button
           className="bg-white p-2 rounded-full relative hover:bg-gray-200"
@@ -109,14 +112,14 @@ const Answering = () => {
       <div className="absolute bottom-4 right-4 z-50 rounded-xl overflow-hidden">
         {!allowCamera && (
           <div
-            className="w-[10rem] flex items-center justify-center bg-[rgba(0,0,0,0.5)]"
+            className="w-[10rem] max-lg:w-[5rem] flex items-center justify-center bg-[rgba(0,0,0,0.5)]"
             style={{ height: localVideoRef.current?.clientHeight }}>
             <Image
               src={callingUser?.photo || "/images/no-profile.jpg"}
               width={100}
               height={100}
               alt="user"
-              className="rounded-full w-[3rem] h-[3rem] object-cover"
+              className="rounded-full w-[3rem] h-[3rem] object-cover max-lg:w-[2rem] max-lg:h-[2rem]"
             />
           </div>
         )}
@@ -124,7 +127,7 @@ const Answering = () => {
           ref={localVideoRef}
           autoPlay
           muted
-          className="w-[10rem]"
+          className="w-[10rem] max-lg:w-[5rem]"
           style={{
             opacity: allowCamera ? 1 : 0,
             position: allowCamera ? "static" : "absolute",

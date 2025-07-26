@@ -65,9 +65,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [offer, setOffer] = useState<RTCSessionDescriptionInit>();
   const [allowMicrophone, setAllowMicrophone] = useState<boolean>(true);
   const [allowCamera, setAllowCamera] = useState<boolean>(true);
-  const [callingUserCamera, setCallingUserCamera] = useState<boolean>(true);
+  const [callingUserCamera, setCallingUserCamera] = useState<boolean>(false);
   const [callingUserMicrophone, setCallingUserMicrophone] =
-    useState<boolean>(true);
+    useState<boolean>(false);
 
   const startCall = async (userId: string | undefined) => {
     setOpen("call");
