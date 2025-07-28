@@ -40,7 +40,7 @@ const Page = () => {
   }, [userId, users]);
 
   return (
-    <div className="flex h-screen">
+    <div className="flex" style={{ height: isLaptop ? "100vh" : "100svh" }}>
       {(isLaptop || !currentChat) && <Chats />}
       <div className="flex flex-col flex-1 bg-[var(--iceberg-blue)] bg-[url('/images/bg-image.png')]">
         <VideoHeader callingUser={callingUser} />
