@@ -40,7 +40,7 @@ const Chats = () => {
             width={24}
             height={24}
             alt="menu"
-            className="w-6 h-6"
+            className="min-w-6 h-6"
           />
         </div>
         <SearchBar email={email} setEmail={setEmail} />

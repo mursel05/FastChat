@@ -41,7 +41,7 @@ const Page = () => {
         {currentChat && (
           <>
             <ChatHeader />
-            <div className="px-40 max-lg:px-4 pb-8 flex flex-col gap-2 bg-[var(--iceberg-blue)] bg-[url('/images/bg-image.png')] h-[calc(100%-72px)] relative">
+            <div className="px-40 max-lg:px-4 pb-8 flex flex-col gap-2 bg-[var(--iceberg-blue)] bg-[url('/images/bg-image.png')] h-[calc(100%-4.5rem)] relative">
               <Messages />
               <SendMessage />
             </div>

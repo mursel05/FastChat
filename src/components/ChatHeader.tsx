@@ -136,7 +136,10 @@ const ChatHeader = () => {
         </div>
         <div
           className="flex items-center gap-2 py-2 px-4 hover:bg-[var(--light-grey)] rounded-md cursor-pointer"
-          onClick={() => setCurrentChat(undefined)}>
+          onClick={() => {
+            setCurrentChat(undefined);
+            router.push("/");
+          }}>
           <Image
             src="/icons/close.png"
             width={15}

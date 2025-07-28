@@ -16,9 +16,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ email, setEmail }) => {
         className="w-6 h-6"
       />
       <input
+        name="search"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="bg-[var(--light-grey)] text-[1rem] font-[400] text-[var(--navy-grey)] placeholder-[var(--navy-grey)] focus:outline-none"
+        className="w-full bg-[var(--light-grey)] text-[1rem] font-[400] text-[var(--navy-grey)] placeholder-[var(--navy-grey)] outline-none"
         type="text"
         placeholder="Search"
       />
