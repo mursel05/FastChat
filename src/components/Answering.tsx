@@ -1,10 +1,14 @@
 import { DataContext } from "@/context/ApiContext";
 import { UserType } from "@/models/user";
-import axiosInstance from "@/utils/axios";
 import Image from "next/image";
-import React, { useContext, useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import React, { useContext, useEffect } from "react";
 
-const Answering = () => {
+type AnsweringProps = {
+  callingUser: UserType | undefined;
+};
+
+const Answering = ({ callingUser }: AnsweringProps) => {
   const {
     localVideoRef,
     remoteVideoRef,
@@ -15,23 +19,23 @@ const Answering = () => {
     allowMicrophone,
     callingUserCamera,
     callingUserMicrophone,
-    callingUserId,
-    user
+    user,
+    answerCall,
+    startCall,
+    call,
   } = useContext(DataContext);
-  const [callingUser, setCallingUser] = useState<UserType | null>(null);
+  const router = useRouter();
+  const { userId } = useParams();
 
   useEffect(() => {
-    async function getUser() {
-      try {
-        const res = await axiosInstance.get(`/users/id/${callingUserId}`);
-        if (res.data.success) {
-          setCallingUser(res.data.data);
-        }
-      } catch {}
+    if (call === "answering") {
+      answerCall();
+    } else if (call === "calling") {
+      startCall(userId as string);
+    } else if (call === "") {
+      router.push("/");
     }
-
-    getUser();
-  }, [callingUserId]);
+  }, [call]);
 
   return (
     <div className="h-full relative flex w-full justify-center items-center">

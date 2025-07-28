@@ -1,6 +1,7 @@
 "use client";
 import { ChatType } from "@/models/chat";
 import { UserType } from "@/models/user";
+import { useParams, useRouter } from "next/navigation";
 import { createContext, useRef, useState } from "react";
 import { ReactNode } from "react";
 import useWebSocket from "react-use-websocket";
@@ -18,17 +19,11 @@ export const DataContext = createContext({
   currentUser: undefined as UserType | undefined,
   setCurrentUser: (user: UserType) => {},
   messagesRef: { current: null as HTMLDivElement | null },
-  open: "",
-  setOpen: (open: any) => {},
   pcRef: { current: null as RTCPeerConnection | null },
-  call: "",
-  setCall: (call: string) => {},
   localVideoRef: { current: null as HTMLVideoElement | null },
   remoteVideoRef: { current: null as HTMLVideoElement | null },
   lastMessage: null as MessageEvent | null,
   sendMessage: (message: string) => {},
-  callingUserId: "",
-  setCallingUserId: (userId: string) => {},
   startCall: async (userId: string | undefined) => {},
   answerCall: async () => {},
   endCall: () => {},
@@ -42,6 +37,8 @@ export const DataContext = createContext({
   callingUserMicrophone: true,
   setCallingUserCamera: (camera: boolean) => {},
   setCallingUserMicrophone: (microphone: boolean) => {},
+  call: "" as string,
+  setCall: (call: string) => {},
 });
 
 export const DataProvider = ({ children }: { children: ReactNode }) => {
@@ -50,10 +47,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserType>();
   const [currentChat, setCurrentChat] = useState<ChatType>();
   const [currentUser, setCurrentUser] = useState<UserType>();
-  const [open, setOpen] = useState<string>("");
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
-  const [call, setCall] = useState<string>("");
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
@@ -61,18 +56,19 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     share: false,
     shouldReconnect: () => true,
   });
-  const [callingUserId, setCallingUserId] = useState<string>("");
   const [offer, setOffer] = useState<RTCSessionDescriptionInit>();
   const [allowMicrophone, setAllowMicrophone] = useState<boolean>(true);
   const [allowCamera, setAllowCamera] = useState<boolean>(true);
-  const [callingUserCamera, setCallingUserCamera] = useState<boolean>(false);
+  const [callingUserCamera, setCallingUserCamera] = useState<boolean>(true);
   const [callingUserMicrophone, setCallingUserMicrophone] =
-    useState<boolean>(false);
+    useState<boolean>(true);
+  const [call, setCall] = useState<string>("");
+  const { userId } = useParams();
 
   const startCall = async (userId: string | undefined) => {
-    setOpen("call");
-    setCall("answering");
-    setCallingUserId(userId || "");
+    console.log(userId);
+    
+    setCallingUserCamera(false);
     const localStream = await navigator.mediaDevices.getUserMedia({
       video: allowCamera,
       audio: allowMicrophone,
@@ -110,44 +106,46 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const answerCall = async () => {
-    setCall("answering");
-    const pc = new RTCPeerConnection();
-    pcRef.current = pc;
+    setTimeout(async () => {
+      const pc = new RTCPeerConnection();
+      pcRef.current = pc;
 
-    const localStream = await navigator.mediaDevices.getUserMedia({
-      video: allowCamera,
-      audio: allowMicrophone,
-    });
-    localVideoRef.current!.srcObject = localStream;
-    localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
+      const localStream = await navigator.mediaDevices.getUserMedia({
+        video: allowCamera,
+        audio: allowMicrophone,
+      });
+      localVideoRef.current!.srcObject = localStream;
+      localStream
+        .getTracks()
+        .forEach((track) => pc.addTrack(track, localStream));
 
-    pc.onicecandidate = (event) => {
-      if (event.candidate)
-        sendMessage(
-          JSON.stringify({
-            type: "callCandidate",
-            data: { candidate: event.candidate, userId: callingUserId },
-          })
-        );
-    };
-    pc.ontrack = (event) => {
-      remoteVideoRef.current!.srcObject = event.streams[0];
-    };
+      pc.onicecandidate = (event) => {
+        if (event.candidate)
+          sendMessage(
+            JSON.stringify({
+              type: "callCandidate",
+              data: { candidate: event.candidate, userId },
+            })
+          );
+      };
+      pc.ontrack = (event) => {
+        remoteVideoRef.current!.srcObject = event.streams[0];
+      };
 
-    await pc.setRemoteDescription(offer as RTCSessionDescriptionInit);
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    sendMessage(
-      JSON.stringify({
-        type: "callAnswer",
-        data: { answer, userId: callingUserId },
-      })
-    );
+      await pc.setRemoteDescription(offer as RTCSessionDescriptionInit);
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      sendMessage(
+        JSON.stringify({
+          type: "callAnswer",
+          data: { answer, userId },
+        })
+      );
+    }, 1000);
   };
 
   const endCall = () => {
     setCall("");
-    setOpen("");
     if (localVideoRef.current?.srcObject) {
       const localStream = localVideoRef.current.srcObject as MediaStream;
       localStream.getTracks().forEach((track) => {
@@ -165,10 +163,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     sendMessage(
       JSON.stringify({
         type: "callEnd",
-        data: { userId: callingUserId },
+        data: { userId },
       })
     );
-    setCallingUserId("");
   };
 
   const toggleCamera = async () => {
@@ -184,7 +181,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         sendMessage(
           JSON.stringify({
             type: "callCamera",
-            data: { userId: callingUserId, allowCamera: !allowCamera },
+            data: { userId, allowCamera: !allowCamera },
           })
         );
       }
@@ -210,7 +207,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         sendMessage(
           JSON.stringify({
             type: "callMicrophone",
-            data: { userId: callingUserId, allowMicrophone: !allowMicrophone },
+            data: { userId, allowMicrophone: !allowMicrophone },
           })
         );
       }
@@ -235,17 +232,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     currentUser,
     setCurrentUser,
     messagesRef,
-    open,
-    setOpen,
     pcRef,
-    call,
-    setCall,
     localVideoRef,
     remoteVideoRef,
     lastMessage,
     sendMessage,
-    callingUserId,
-    setCallingUserId,
     startCall,
     answerCall,
     endCall,
@@ -259,6 +250,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     callingUserMicrophone,
     setCallingUserCamera,
     setCallingUserMicrophone,
+    call,
+    setCall,
   };
 
   return (

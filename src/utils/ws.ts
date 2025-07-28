@@ -1,6 +1,7 @@
 import { DataContext } from "@/context/ApiContext";
 import { useContext, useEffect } from "react";
 import axiosInstance from "./axios";
+import { useRouter } from "next/navigation";
 
 export const wsHandler = () => {
   const {
@@ -9,16 +10,15 @@ export const wsHandler = () => {
     user,
     chats,
     pcRef,
-    setCall,
-    setOpen,
     lastMessage,
-    setCallingUserId,
     setOffer,
     localVideoRef,
     remoteVideoRef,
     setCallingUserCamera,
     setCallingUserMicrophone,
+    setCall,
   } = useContext(DataContext);
+  const router = useRouter();
 
   useEffect(() => {
     async function getChat(id: string) {
@@ -82,29 +82,25 @@ export const wsHandler = () => {
     }
 
     async function handleCallOffer(res: any) {
-      setOpen("call");
+      router.push(`/${res.data.userId}/calling`);
       setCall("calling");
-      setCallingUserId(res.data.userId);
       setOffer(res.data.offer);
     }
 
     async function handleCallAnswer(res: any) {
-      setCall("answering");
       if (pcRef.current)
         await pcRef.current.setRemoteDescription(res.data.answer);
+      setCallingUserCamera(true);
     }
 
     async function handleCallCandidate(res: any) {
       if (pcRef.current)
-        if (pcRef.current)
-          await pcRef.current.addIceCandidate(res.data.candidate);
+        await pcRef.current.addIceCandidate(res.data.candidate);
     }
 
     async function handleCallEnd() {
-      setCall("");
-      setOpen("");
-      setCallingUserId("");
       if (localVideoRef.current?.srcObject) {
+        setCall("");
         const localStream = localVideoRef.current.srcObject as MediaStream;
         localStream.getTracks().forEach((track) => {
           track.stop();

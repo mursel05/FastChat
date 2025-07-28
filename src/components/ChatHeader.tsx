@@ -1,7 +1,8 @@
 import { DataContext } from "@/context/ApiContext";
 import axiosInstance from "@/utils/axios";
 import Image from "next/image";
-import { useContext, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
 
 const ChatHeader = () => {
   const {
@@ -9,11 +10,12 @@ const ChatHeader = () => {
     setCurrentChat,
     currentChat,
     setChats,
+    setCall,
     call,
     startCall,
-    setOpen,
   } = useContext(DataContext);
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   const formatLastSeen = (lastSeen: string) => {
     if (lastSeen === "online") return "online";
@@ -45,12 +47,19 @@ const ChatHeader = () => {
       const res = await axiosInstance.delete("/chats/" + currentChat?.id);
       if (res.data.success) {
         setCurrentChat(undefined);
+        router.push("/");
         setChats((prevChats) =>
           prevChats.filter((chat) => chat.id !== currentChat?.id)
         );
       }
     } catch {}
   }
+
+  useEffect(() => {
+    if (call === "calling") {
+      router.push(`/${currentUser?.id}/answering`);
+    }
+  }, [call]);
 
   return (
     <div className="relative flex items-center gap-4 py-3 px-4 border-l border-[var(--light-blue-grey)] bg-white">
@@ -86,7 +95,7 @@ const ChatHeader = () => {
         </div>
         <div
           className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2 max-lg:p-0 max-lg:hover:bg-[unset]"
-          onClick={() => (call ? setOpen("call") : startCall(currentUser?.id))}>
+          onClick={() => setCall("calling")}>
           <Image
             src="/icons/call.png"
             width={35}

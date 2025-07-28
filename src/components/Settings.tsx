@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 
 const Settings = () => {
-  const { user, setOpen } = useContext(DataContext);
+  const { user } = useContext(DataContext);
   const [hover, setHover] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -66,8 +66,16 @@ const Settings = () => {
   return (
     <div className="flex items-center justify-center h-full">
       <form
-        className="bg-white rounded-md p-8 flex flex-col gap-4"
+        className="bg-white rounded-md p-8 flex flex-col gap-4 relative"
         onSubmit={handleForm}>
+        <Image
+          src="/icons/close.png"
+          width={24}
+          height={24}
+          alt="close"
+          className="absolute top-4 right-4 cursor-pointer"
+          onClick={() => router.push("/")}
+        />
         <div
           className="cursor-pointer relative w-max self-center mb-2"
           onMouseEnter={() => setHover(true)}
@@ -127,12 +135,6 @@ const Settings = () => {
           type="submit"
           className="self-center py-2 w-full bg-blue-500 cursor-pointer text-white rounded-xl hover:bg-blue-600">
           Save
-        </button>
-        <button
-          type="button"
-          onClick={() => setOpen("")}
-          className="self-center py-2 w-full bg-gray-500 cursor-pointer text-white rounded-xl hover:bg-gray-600">
-          Cancel
         </button>
         <button
           type="button"

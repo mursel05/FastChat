@@ -3,6 +3,7 @@ import { ChatType } from "@/models/chat";
 import { UserType } from "@/models/user";
 import axiosInstance from "@/utils/axios";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useContext } from "react";
 
 interface UserModalProps {
@@ -10,8 +11,8 @@ interface UserModalProps {
 }
 
 const UserModal: React.FC<UserModalProps> = ({ user }) => {
-  const { setChats, setCurrentChat, chats, setUsers, setOpen } =
-    useContext(DataContext);
+  const { setChats, setCurrentChat, chats, setUsers } = useContext(DataContext);
+  const router = useRouter();
 
   async function createChat() {
     const res = await axiosInstance.post("/chats", {
@@ -23,6 +24,7 @@ const UserModal: React.FC<UserModalProps> = ({ user }) => {
     if (res.data.success) {
       setChats((prev) => [...prev, res.data.data]);
       setCurrentChat(res.data.data);
+      router.push(`/${res.data.data.id}`);
       setUsers((prev) => [...prev, user]);
     }
   }
@@ -31,9 +33,9 @@ const UserModal: React.FC<UserModalProps> = ({ user }) => {
     const currentChat = chats.find((chat) =>
       chat.persons.some((p) => p.userId === user.id)
     );
-    setOpen("");
     if (currentChat) {
       setCurrentChat(currentChat);
+      router.push(`/${currentChat.id}`);
     } else {
       createChat();
     }

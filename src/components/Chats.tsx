@@ -7,11 +7,13 @@ import { DataContext } from "@/context/ApiContext";
 import axiosInstance from "@/utils/axios";
 import { UserType } from "@/models/user";
 import UserModal from "./UserModal";
+import { useRouter } from "next/navigation";
 
 const Chats = () => {
-  const { chats, currentChat, setOpen } = useContext(DataContext);
+  const { chats, currentChat } = useContext(DataContext);
   const [email, setEmail] = useState<string>("");
   const [searchUsers, setSearchUsers] = useState<UserType[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     async function getUser() {
@@ -32,9 +34,7 @@ const Chats = () => {
       <div className="flex items-center gap-7 py-4 px-6">
         <div
           className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2"
-          onClick={() =>
-            setOpen((prev: string) => (prev === "settings" ? "" : "settings"))
-          }>
+          onClick={() => router.push("/settings")}>
           <Image
             src="/icons/menu.png"
             width={24}

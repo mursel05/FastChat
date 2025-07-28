@@ -3,6 +3,7 @@ import { ChatType } from "@/models/chat";
 import { UserType } from "@/models/user";
 import axiosInstance from "@/utils/axios";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 
 interface UserChatModalProps {
@@ -10,9 +11,9 @@ interface UserChatModalProps {
 }
 
 const UserChatModal: React.FC<UserChatModalProps> = ({ chat }) => {
-  const { users, user, setUsers, setCurrentChat, setOpen } =
-    useContext(DataContext);
+  const { users, user, setUsers, setCurrentChat } = useContext(DataContext);
   const [otherUser, setOtherUser] = useState<UserType | undefined>();
+  const router = useRouter();
 
   useEffect(() => {
     async function getUser(otherUserId: string) {
@@ -36,8 +37,8 @@ const UserChatModal: React.FC<UserChatModalProps> = ({ chat }) => {
   }, []);
 
   function openChat() {
-    setOpen("");
     setCurrentChat(chat);
+    router.push(`/${chat.id}`);
   }
 
   return (

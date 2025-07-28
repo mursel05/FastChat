@@ -1,6 +1,7 @@
 import { DataContext } from "@/context/ApiContext";
 import { useContext, useEffect } from "react";
 import axiosInstance from "./axios";
+import { useParams, useRouter } from "next/navigation";
 
 const useEffects = () => {
   const {
@@ -14,7 +15,10 @@ const useEffects = () => {
     currentUser,
     setCurrentUser,
     messagesRef,
+    call,
   } = useContext(DataContext);
+  const router = useRouter();
+  const { userId } = useParams();
 
   useEffect(() => {
     async function getUser() {
