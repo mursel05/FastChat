@@ -1,5 +1,5 @@
 FROM node:22-alpine
-RUN apk add --no-cache git nginx
+RUN apk add --no-cache git nginx curl
 
 WORKDIR /frontend
 COPY package*.json ./
