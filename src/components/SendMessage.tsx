@@ -103,7 +103,10 @@ const SendMessage = () => {
       if (file) {
         const formData = new FormData();
         formData.append("file", file);
-        const res = await axiosInstance.post("/files", formData);
+        const res = await axiosInstance.post(
+          "/files/" + currentChat?.id,
+          formData
+        );
         if (res.data.success) {
           const response = await axiosInstance.post("/messages", {
             id: tempId,

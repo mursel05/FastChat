@@ -2,10 +2,89 @@ import { DataContext } from "@/context/ApiContext";
 import { MessageType } from "@/models/message";
 import axiosInstance from "@/utils/axios";
 import Image from "next/image";
-import { useCallback, useContext, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { defaultStyles, FileIcon } from "react-file-icon";
 import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
+import axios from "axios";
+
+interface FileImageProps {
+  src: string;
+  type: string;
+  className: string;
+  width?: number;
+  height?: number;
+  alt?: string;
+  onClick?: () => void;
+}
+
+const PrivateFile = ({
+  src,
+  type,
+  className,
+  width,
+  height,
+  alt,
+  onClick,
+}: FileImageProps) => {
+  const [fileUrl, setFileUrl] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchFile = async () => {
+      try {
+        setLoading(true);
+        const res = await axiosInstance.get(`/files/${src}`, {
+          responseType: "blob",
+        });
+        const blob = await res.data;
+        const url = URL.createObjectURL(blob);
+        setFileUrl(url);
+      } catch {
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (src.startsWith("blob:")) {
+      setFileUrl(src);
+    } else {
+      fetchFile();
+    }
+    return () => {
+      if (fileUrl) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    };
+  }, []);
+
+  if (!loading) {
+    if (type === "image") {
+      return (
+        <Image
+          src={fileUrl}
+          onClick={onClick}
+          alt={alt || ""}
+          className={className}
+          width={width}
+          height={height}
+        />
+      );
+    } else if (type === "video") {
+      return (
+        <video
+          src={fileUrl}
+          className={className}
+          width={width}
+          height={height}
+          controls
+        />
+      );
+    } else if (type === "audio") {
+      return <audio src={fileUrl} className={className} controls />;
+    }
+  }
+};
 
 interface MessageProps {
   message: MessageType;
@@ -28,6 +107,16 @@ const Message: React.FC<MessageProps> = ({ message }) => {
   function getFileExtension() {
     const parts = message.fileName.split(".");
     return parts.length > 1 ? parts.pop()?.toLowerCase() : "";
+  }
+
+  async function saveFile(src: string, fileName: string) {
+    try {
+      const res = await axiosInstance.get(`/files/${src}`, {
+        responseType: "blob",
+      });
+      const blob = await res.data;
+      saveAs(blob, fileName);
+    } catch {}
   }
 
   const messageRefCallback = useCallback(
@@ -56,44 +145,33 @@ const Message: React.FC<MessageProps> = ({ message }) => {
     [messagesRef]
   );
 
-  async function downloadFileWithProgress(url: string | URL | Request) {
+  async function downloadFileWithProgress(url: string) {
     const abortController = new AbortController();
     setController(abortController);
 
     try {
-      const response = await fetch(url, { signal: abortController.signal });
+      const response = await axiosInstance.get(`/files/${url}`, {
+        responseType: "blob",
+        signal: abortController.signal,
+        onDownloadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percent = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setPercent(percent);
+          }
+        },
+      });
 
-      if (!response.ok) {
-        Swal.fire({
-          title: "No internet connection",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
-        return;
-      }
-
-      const contentLength = response.headers.get("Content-Length");
-      if (!contentLength) return;
-
-      const total = parseInt(contentLength, 10);
-      let loaded = 0;
-      const reader = response.body?.getReader();
-      const chunks = [];
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-          loaded += value.length;
-          setPercent(Math.round((loaded / total) * 100));
-        }
-      }
-
-      const blob = new Blob(chunks);
-      saveAs(blob, message.fileName);
+      saveAs(response.data, message.fileName);
     } catch (error: any) {
-      if (error.name !== "AbortError") {
+      if (
+        !(
+          error instanceof axios.Cancel ||
+          error.name === "CanceledError" ||
+          error.name === "AbortError"
+        )
+      ) {
         Swal.fire({
           title: "Download failed",
           icon: "error",
@@ -114,26 +192,29 @@ const Message: React.FC<MessageProps> = ({ message }) => {
         data-message-id={message.id}>
         {message.messageType != "text" &&
           (message.messageType.split("/")[0] == "image" ? (
-            <Image
-              src={message.mediaUrl}
+            <PrivateFile
+              type="image"
               alt="user"
               width={600}
               height={600}
-              onClick={() => saveAs(message.mediaUrl)}
+              onClick={() => saveFile(message.mediaUrl, message.fileName)}
+              src={message.mediaUrl}
               className="cursor-pointer w-[18.75rem] max-h-[18.75rem] object-contain rounded-lg"
             />
           ) : message.messageType.split("/")[0] == "video" ? (
-            <video
+            <PrivateFile
+              type="video"
               src={message.mediaUrl}
-              controls
-              width="300"
-              height="300"
-              className="cursor-pointer"></video>
+              width={300}
+              height={300}
+              className="cursor-pointer"
+            />
           ) : message.messageType.split("/")[0] == "audio" ? (
-            <audio
+            <PrivateFile
+              type="audio"
               src={message.mediaUrl}
-              controls
-              className="cursor-pointer"></audio>
+              className="cursor-pointer"
+            />
           ) : (
             <div className="w-[6.25rem] h-[6.25rem] self-center mb-5 relative">
               <div
@@ -202,26 +283,29 @@ const Message: React.FC<MessageProps> = ({ message }) => {
       <div className="py-2 px-3 bg-[var(--light-green)] rounded-lg max-w-[35rem] max-lg:max-w-[2`0rem] flex flex-col self-end w-max relative">
         {message.messageType != "text" &&
           (message.messageType.split("/")[0] == "image" ? (
-            <Image
+            <PrivateFile
+              type="image"
               src={message.mediaUrl}
               alt="user"
               width={600}
               height={600}
-              onClick={() => saveAs(message.mediaUrl, message.fileName)}
+              onClick={() => saveFile(message.mediaUrl, message.fileName)}
               className="cursor-pointer w-[18.75rem] max-h-[18.75rem] object-contain rounded-lg"
             />
           ) : message.messageType.split("/")[0] == "video" ? (
-            <video
+            <PrivateFile
+              type="video"
               src={message.mediaUrl}
-              controls
-              width="300"
-              height="300"
-              className="cursor-pointer"></video>
+              className="cursor-pointer"
+              width={300}
+              height={300}
+            />
           ) : message.messageType.split("/")[0] == "audio" ? (
-            <audio
+            <PrivateFile
+              type="audio"
               src={message.mediaUrl}
-              controls
-              className="cursor-pointer"></audio>
+              className="cursor-pointer"
+            />
           ) : (
             <div className="w-[6.25rem] h-[6.25rem] self-center mb-5 relative">
               <div

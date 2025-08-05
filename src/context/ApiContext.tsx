@@ -66,8 +66,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const { userId } = useParams();
 
   const startCall = async (userId: string | undefined) => {
-    console.log(userId);
-    
     setCallingUserCamera(false);
     const localStream = await navigator.mediaDevices.getUserMedia({
       video: allowCamera,
