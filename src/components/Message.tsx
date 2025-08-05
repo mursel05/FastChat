@@ -110,7 +110,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
     return message.sender == currentUser?.id ? (
       <div
         ref={messageRefCallback}
-        className="py-1 px-3 bg-white rounded-lg max-w-[60%] flex flex-col w-max relative"
+        className="py-1 px-3 bg-white rounded-lg max-w-[35rem] max-lg:max-w-[2`0rem] flex flex-col w-max relative"
         data-message-id={message.id}>
         {message.messageType != "text" &&
           (message.messageType.split("/")[0] == "image" ? (
@@ -120,7 +120,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               width={600}
               height={600}
               onClick={() => saveAs(message.mediaUrl)}
-              className="cursor-pointer max-w-[18.75rem] max-h-[18.75rem] object-contain rounded-lg"
+              className="cursor-pointer w-[18.75rem] max-h-[18.75rem] object-contain rounded-lg"
             />
           ) : message.messageType.split("/")[0] == "video" ? (
             <video
@@ -189,7 +189,6 @@ const Message: React.FC<MessageProps> = ({ message }) => {
           ))}
         <span className="font-[400] text-[1rem]">{message.message}</span>
         <div className="self-end flex gap-2 items-center">
-          {/* <span>❤️</span> */}
           <span className="text-[0.75rem] font-[400] mt-1">
             {new Date(message.createdAt).toLocaleTimeString("en-US", {
               hour: "numeric",
@@ -200,7 +199,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
         </div>
       </div>
     ) : (
-      <div className="py-2 px-3 bg-[var(--light-green)] rounded-lg max-w-[60%] flex flex-col self-end w-max relative">
+      <div className="py-2 px-3 bg-[var(--light-green)] rounded-lg max-w-[35rem] max-lg:max-w-[2`0rem] flex flex-col self-end w-max relative">
         {message.messageType != "text" &&
           (message.messageType.split("/")[0] == "image" ? (
             <Image
@@ -209,7 +208,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               width={600}
               height={600}
               onClick={() => saveAs(message.mediaUrl, message.fileName)}
-              className="cursor-pointer max-w-[18.75rem] max-h-[18.75rem] object-contain rounded-lg"
+              className="cursor-pointer w-[18.75rem] max-h-[18.75rem] object-contain rounded-lg"
             />
           ) : message.messageType.split("/")[0] == "video" ? (
             <video
@@ -278,7 +277,6 @@ const Message: React.FC<MessageProps> = ({ message }) => {
           ))}
         <span className="font-[400] text-[1rem]">{message.message}</span>
         <div className="self-end flex gap-2 items-center">
-          {/* <span>❤️</span> */}
           <span className="text-[0.75rem] font-[400] mt-1 text-white">
             {new Date(message.createdAt).toLocaleTimeString("en-US", {
               hour: "numeric",
