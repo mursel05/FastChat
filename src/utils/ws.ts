@@ -99,8 +99,8 @@ export const wsHandler = () => {
     }
 
     async function handleCallEnd() {
+      setCall("");
       if (localVideoRef.current?.srcObject) {
-        setCall("");
         const localStream = localVideoRef.current.srcObject as MediaStream;
         localStream.getTracks().forEach((track) => {
           track.stop();

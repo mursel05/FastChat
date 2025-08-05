@@ -2,7 +2,7 @@ import { DataContext } from "@/context/ApiContext";
 import axiosInstance from "@/utils/axios";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 
 const ChatHeader = () => {
   const {
@@ -11,8 +11,6 @@ const ChatHeader = () => {
     currentChat,
     setChats,
     setCall,
-    call,
-    startCall,
   } = useContext(DataContext);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
@@ -55,12 +53,6 @@ const ChatHeader = () => {
     } catch {}
   }
 
-  useEffect(() => {
-    if (call === "calling") {
-      router.push(`/${currentUser?.id}/answering`);
-    }
-  }, [call]);
-
   return (
     <div className="relative flex items-center gap-4 py-3 px-4 border-l border-[var(--light-blue-grey)] bg-white">
       <Image
@@ -83,7 +75,7 @@ const ChatHeader = () => {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <div className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2 max-lg:p-0 max-lg:hover:bg-[unset]">
+        {/* <div className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2 max-lg:p-0 max-lg:hover:bg-[unset]">
           <div></div>
           <Image
             src="/icons/search.png"
@@ -92,12 +84,29 @@ const ChatHeader = () => {
             alt="search"
             className="min-w-6 h-6"
           />
+        </div> */}
+        <div
+          className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2 max-lg:p-0 max-lg:hover:bg-[unset]"
+          onClick={() => {
+            setCall("calling");
+            router.push(`/${currentUser?.id}/answering`);
+          }}>
+          <Image
+            src="/icons/call.png"
+            width={35}
+            height={35}
+            alt="phone"
+            className="min-w-6 h-6"
+          />
         </div>
         <div
           className="cursor-pointer hover:bg-[var(--light-grey)] rounded-full p-2 max-lg:p-0 max-lg:hover:bg-[unset]"
-          onClick={() => setCall("calling")}>
+          onClick={() => {
+            setCall("calling");
+            router.push(`/${currentUser?.id}/answering`);
+          }}>
           <Image
-            src="/icons/call.png"
+            src="/icons/video-call-icon.png"
             width={35}
             height={35}
             alt="phone"

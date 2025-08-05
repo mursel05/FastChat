@@ -2,7 +2,7 @@
 import { DataContext } from "@/context/ApiContext";
 import axiosInstance from "@/utils/axios";
 import Image from "next/image";
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 
@@ -18,6 +18,16 @@ const Settings = () => {
   });
   const router = useRouter();
 
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name,
+        surname: user.surname,
+        photo: user.photo,
+      });
+    }
+  }, [user]);
+
   async function uploadImage() {
     if (file) {
       const formData = new FormData();
@@ -32,24 +42,40 @@ const Settings = () => {
 
   async function handleForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!formData.name || !formData.surname) {
+      Swal.fire({
+        title: "Error",
+        text: "Name and surname are required",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
     try {
-      let updatedPhoto = formData.photo;
       if (file) {
         const uploadedPath = await uploadImage();
-        if (uploadedPath) {
-          updatedPhoto = uploadedPath;
-        }
-      }
-      const res = await axiosInstance.put("/users", {
-        ...formData,
-        photo: updatedPhoto,
-      });
-      if (res.data.success) {
-        Swal.fire({
-          title: "Profile Updated",
-          icon: "success",
-          confirmButtonText: "OK",
+        const res = await axiosInstance.put("/users", {
+          ...formData,
+          photo: uploadedPath,
         });
+        if (res.data.success) {
+          Swal.fire({
+            title: "Profile Updated",
+            icon: "success",
+            confirmButtonText: "OK",
+          });
+        }
+      } else {
+        const res = await axiosInstance.put("/users", {
+          ...formData,
+        });
+        if (res.data.success) {
+          Swal.fire({
+            title: "Profile Updated",
+            icon: "success",
+            confirmButtonText: "OK",
+          });
+        }
       }
     } catch {}
   }
