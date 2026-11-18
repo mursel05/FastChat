@@ -7,15 +7,6 @@ import { ReactNode } from "react";
 import useWebSocket from "react-use-websocket";
 import Swal from "sweetalert2";
 
-// Falls back to the same-origin /wss route served by nginx, so the app
-// works on any domain (e.g. fastchat.mursal.dev) without a rebuild.
-// Defined at module level so its identity is stable across renders.
-const getWsUrl = () =>
-  process.env.NEXT_PUBLIC_WS_URL ||
-  `${window.location.protocol === "https:" ? "wss" : "ws"}://${
-    window.location.host
-  }/wss`;
-
 export const DataContext = createContext({
   chats: [] as ChatType[],
   setChats: (chats: (prev: ChatType[]) => ChatType[]) => {},
@@ -60,7 +51,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
-  const { lastMessage, sendMessage } = useWebSocket(getWsUrl, {
+  const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+  const { lastMessage, sendMessage } = useWebSocket(wsUrl as string, {
     share: false,
     shouldReconnect: () => true,
   });

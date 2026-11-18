@@ -2,9 +2,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 
 const axiosInstance = axios.create({
-  // Falls back to the same-origin /api route served by nginx, so the app
-  // works on any domain (e.g. fastchat.mursal.dev) without a rebuild.
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 10000,
   withCredentials: true,
   validateStatus: function (status) {
